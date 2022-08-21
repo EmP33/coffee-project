@@ -5,6 +5,9 @@ import Image from "next/image";
 import styles from "../styles/Home.module.css";
 // Components
 import Banner from "../components/banner";
+import Card from "../components/card";
+
+import coffeeStores from "../data/coffee-stores.json";
 
 const Home: NextPage = () => {
   const handleOnBannerBtnClick = () => {
@@ -24,7 +27,23 @@ const Home: NextPage = () => {
           handleOnClick={handleOnBannerBtnClick}
         />
         <div className={styles.heroImage}>
-          <Image src="/static/hero-image.png" width={700} height={400} />
+          <Image
+            src="/static/hero-image.png"
+            width={700}
+            height={400}
+            alt="Hero"
+          />
+        </div>
+        <div className={styles.cardLayout}>
+          {coffeeStores.map((store) => (
+            <Card
+              key={store.id}
+              name={store.name}
+              imgURL={store.imgUrl}
+              href={`/coffee-store/${store.id}`}
+              className={styles.card}
+            />
+          ))}
         </div>
       </main>
     </div>
