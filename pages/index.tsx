@@ -1,9 +1,12 @@
+import { useContext, useEffect, useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
+import useTractLocation from "../hooks/use-track-location";
+import { fetchCoffeeStores, getUnsplashPhotos } from "../lib/coffee-stores";
+import coffeeStoresData from "../data/coffee-stores.json";
+import { ACTION_TYPES, StoreContext } from "../store/store-context";
 // Styles
 import styles from "../styles/Home.module.css";
-import { fetchCoffeeStores } from "../lib/coffee-stores";
-import coffeeStoresData from "../data/coffee-stores.json";
 // Components
 import Banner from "../components/banner";
 import Card from "../components/card";
@@ -12,8 +15,6 @@ import { coffeeStoreType } from "../data.types";
 
 export async function getStaticProps(context: any) {
   const coffeeStores = await fetchCoffeeStores();
-
-  console.log(coffeeStores);
 
   return {
     props: { coffeeStores },
@@ -25,9 +26,43 @@ interface Props {
 }
 
 const Home: React.FC<Props> = ({ coffeeStores }) => {
+  // const [fetchedCoffeeStores, setFetchedCoffeeStores] = useState<any[]>([]);
+  const { handleTrackLocation, locationErrorMsg, isFindingLocation } =
+    useTractLocation();
+
   const handleOnBannerBtnClick = () => {
-    console.log(coffeeStores);
+    handleTrackLocation();
   };
+
+  console.log(process.env);
+
+  const { dispatch, state } = useContext(StoreContext);
+  const { coffeeStores: fetchedCoffeeStores, latLong } = state;
+
+  useEffect(() => {
+    async function setCoffeeStoresByLocation() {
+      if (latLong) {
+        try {
+          const data = await fetchCoffeeStores(
+            "40.733749223985704%2C-74.05012276809782"
+          );
+
+          // setFetchedCoffeeStores(data);
+          dispatch({
+            type: ACTION_TYPES.SET_COFFEE_STORES,
+            payload: { coffeeStores: data },
+          });
+
+          //set coffee stores
+        } catch (error) {
+          //set error
+          console.error({ error });
+        }
+      }
+    }
+    setCoffeeStoresByLocation();
+  }, [latLong]);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -38,9 +73,11 @@ const Home: React.FC<Props> = ({ coffeeStores }) => {
 
       <main className={styles.main}>
         <Banner
-          buttonText="View stores nearby"
+          buttonText={isFindingLocation ? "Locating..." : "View stores nearby"}
           handleOnClick={handleOnBannerBtnClick}
         />
+        {locationErrorMsg && <p>Something went wrong: {locationErrorMsg}</p>}
+
         <div className={styles.heroImage}>
           <Image
             src="/static/hero-image.png"
@@ -49,8 +86,34 @@ const Home: React.FC<Props> = ({ coffeeStores }) => {
             alt="Hero"
           />
         </div>
+        {latLong && !fetchedCoffeeStores.length ? (
+          <h2 className={styles.heading2}>No stores near you</h2>
+        ) : (
+          ""
+        )}
+        {fetchedCoffeeStores.length > 0 ? (
+          <div className={styles.sectionWrapper}>
+            <h2 className={styles.heading2}>Stores near you</h2>
+            <div className={styles.cardLayout}>
+              {fetchedCoffeeStores.map((store) => (
+                <Card
+                  key={store.id}
+                  name={store.name}
+                  imgURL={
+                    store.imgUrl ||
+                    "https://images.unsplash.com/photo-1504753793650-d4a2b783c15e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80"
+                  }
+                  href={`/coffee-store/${store.id}`}
+                  className={styles.card}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          ""
+        )}
         {coffeeStores.length > 0 ? (
-          <>
+          <div className={styles.sectionWrapper}>
             <h2 className={styles.heading2}>Toronto stores</h2>
             <div className={styles.cardLayout}>
               {coffeeStores.map((store) => (
@@ -66,7 +129,7 @@ const Home: React.FC<Props> = ({ coffeeStores }) => {
                 />
               ))}
             </div>
-          </>
+          </div>
         ) : (
           ""
         )}

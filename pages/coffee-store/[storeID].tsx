@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Head from "next/head";
@@ -8,9 +8,10 @@ import cls from "classnames";
 
 import styles from "../../styles/coffee-store.module.css";
 
-import coffeeStoresData from "../../data/coffee-stores.json";
-import { coffeeStoreType } from "../../data.types";
 import { fetchCoffeeStores } from "../../lib/coffee-stores";
+import { StoreContext } from "../../store/store-context";
+
+import { isEmpty } from "../../utils";
 
 export async function getStaticProps(staticProps: any) {
   const { params } = staticProps;
@@ -18,9 +19,10 @@ export async function getStaticProps(staticProps: any) {
   const coffeeStores = await fetchCoffeeStores();
   return {
     props: {
-      coffeeStore: coffeeStores.find(
-        (coffeeStore: any) => coffeeStore.id.toString() === params.storeID
-      ),
+      coffeeStore:
+        coffeeStores.find(
+          (coffeeStore: any) => coffeeStore.id.toString() === params.storeID
+        ) || {},
     },
   };
 }
@@ -44,18 +46,37 @@ interface Props {
   coffeeStore: any;
 }
 
-const CoffeeStore: React.FC<Props> = ({ coffeeStore }) => {
+const CoffeeStore: React.FC<Props> = (initialProps) => {
   const router = useRouter();
+
+  const id = router.query.storeID;
+
+  const [coffeeStore, setCoffeStore] = useState(initialProps.coffeeStore);
+
+  const {
+    state: { coffeeStores },
+  } = useContext(StoreContext);
+
+  useEffect(() => {
+    if (isEmpty(initialProps.coffeeStore)) {
+      const findCoffeeStoreById = coffeeStores.find(
+        (coffeeStore: any) => coffeeStore.id.toString() === id
+      );
+      console.log(findCoffeeStoreById);
+      if (coffeeStores.length > 0) {
+        setCoffeStore(findCoffeeStoreById);
+      }
+    }
+  }, [id]);
+
+  const handleUpVoteButton = () => console.log("Handle upvote");
 
   if (router.isFallback) {
     return <div>Loading...</div>;
   }
-
-  console.log(coffeeStore);
-
   const { address, neighborhood, name, imgUrl } = coffeeStore;
 
-  const handleUpVoteButton = () => console.log("Handle upvote");
+  console.log(coffeeStore);
 
   return (
     <div className={styles.layout}>
