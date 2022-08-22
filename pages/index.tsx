@@ -1,4 +1,3 @@
-import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 // Styles
@@ -7,9 +6,21 @@ import styles from "../styles/Home.module.css";
 import Banner from "../components/banner";
 import Card from "../components/card";
 
-import coffeeStores from "../data/coffee-stores.json";
+import coffeeStoresData from "../data/coffee-stores.json";
+// Types
+import { coffeeStoreType } from "../data.types";
 
-const Home: NextPage = () => {
+export async function getStaticProps(context: any) {
+  return {
+    props: { coffeeStores: coffeeStoresData },
+  };
+}
+
+interface Props {
+  coffeeStores: coffeeStoreType[];
+}
+
+const Home: React.FC<Props> = ({ coffeeStores }) => {
   const handleOnBannerBtnClick = () => {
     console.log("Hi banner button");
   };
@@ -34,17 +45,24 @@ const Home: NextPage = () => {
             alt="Hero"
           />
         </div>
-        <div className={styles.cardLayout}>
-          {coffeeStores.map((store) => (
-            <Card
-              key={store.id}
-              name={store.name}
-              imgURL={store.imgUrl}
-              href={`/coffee-store/${store.id}`}
-              className={styles.card}
-            />
-          ))}
-        </div>
+        {coffeeStores.length > 0 ? (
+          <>
+            <h2 className={styles.heading2}>Toronto stores</h2>
+            <div className={styles.cardLayout}>
+              {coffeeStores.map((store) => (
+                <Card
+                  key={store.id}
+                  name={store.name}
+                  imgURL={store.imgUrl}
+                  href={`/coffee-store/${store.id}`}
+                  className={styles.card}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          ""
+        )}
       </main>
     </div>
   );
