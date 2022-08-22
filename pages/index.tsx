@@ -2,27 +2,31 @@ import Head from "next/head";
 import Image from "next/image";
 // Styles
 import styles from "../styles/Home.module.css";
+import { fetchCoffeeStores } from "../lib/coffee-stores";
+import coffeeStoresData from "../data/coffee-stores.json";
 // Components
 import Banner from "../components/banner";
 import Card from "../components/card";
-
-import coffeeStoresData from "../data/coffee-stores.json";
 // Types
 import { coffeeStoreType } from "../data.types";
 
 export async function getStaticProps(context: any) {
+  const coffeeStores = await fetchCoffeeStores();
+
+  console.log(coffeeStores);
+
   return {
-    props: { coffeeStores: coffeeStoresData },
+    props: { coffeeStores },
   };
 }
 
 interface Props {
-  coffeeStores: coffeeStoreType[];
+  coffeeStores: any[];
 }
 
 const Home: React.FC<Props> = ({ coffeeStores }) => {
   const handleOnBannerBtnClick = () => {
-    console.log("Hi banner button");
+    console.log(coffeeStores);
   };
   return (
     <div className={styles.container}>
@@ -53,7 +57,10 @@ const Home: React.FC<Props> = ({ coffeeStores }) => {
                 <Card
                   key={store.id}
                   name={store.name}
-                  imgURL={store.imgUrl}
+                  imgURL={
+                    store.imgUrl ||
+                    "https://images.unsplash.com/photo-1504753793650-d4a2b783c15e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80"
+                  }
                   href={`/coffee-store/${store.id}`}
                   className={styles.card}
                 />

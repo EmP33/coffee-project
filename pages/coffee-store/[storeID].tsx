@@ -10,21 +10,24 @@ import styles from "../../styles/coffee-store.module.css";
 
 import coffeeStoresData from "../../data/coffee-stores.json";
 import { coffeeStoreType } from "../../data.types";
+import { fetchCoffeeStores } from "../../lib/coffee-stores";
 
-export function getStaticProps(staticProps: any) {
+export async function getStaticProps(staticProps: any) {
   const { params } = staticProps;
-  console.log(staticProps);
+
+  const coffeeStores = await fetchCoffeeStores();
   return {
     props: {
-      coffeeStore: coffeeStoresData.find(
-        (coffeeStore) => coffeeStore.id.toString() === params.storeID
+      coffeeStore: coffeeStores.find(
+        (coffeeStore: any) => coffeeStore.id.toString() === params.storeID
       ),
     },
   };
 }
 
-export function getStaticPaths() {
-  const paths = coffeeStoresData.map((coffeeStore) => {
+export async function getStaticPaths() {
+  const coffeeStores = await fetchCoffeeStores();
+  const paths = coffeeStores.map((coffeeStore: any) => {
     return {
       params: {
         storeID: coffeeStore.id.toString(),
@@ -38,7 +41,7 @@ export function getStaticPaths() {
 }
 
 interface Props {
-  coffeeStore: coffeeStoreType;
+  coffeeStore: any;
 }
 
 const CoffeeStore: React.FC<Props> = ({ coffeeStore }) => {
@@ -48,7 +51,9 @@ const CoffeeStore: React.FC<Props> = ({ coffeeStore }) => {
     return <div>Loading...</div>;
   }
 
-  const { address, name, neighbourhood, imgUrl } = coffeeStore;
+  console.log(coffeeStore);
+
+  const { address, neighborhood, name, imgUrl } = coffeeStore;
 
   const handleUpVoteButton = () => console.log("Handle upvote");
 
@@ -61,7 +66,7 @@ const CoffeeStore: React.FC<Props> = ({ coffeeStore }) => {
         <div className={styles.col1}>
           <div className={styles.backToHomeLink}>
             <Link href="/">
-              <a>Back to home</a>
+              <a>← Back to home</a>
             </Link>
           </div>
           <div className={styles.nameWrapper}>
@@ -69,7 +74,10 @@ const CoffeeStore: React.FC<Props> = ({ coffeeStore }) => {
           </div>
 
           <Image
-            src={imgUrl}
+            src={
+              imgUrl ||
+              "https://images.unsplash.com/photo-1504753793650-d4a2b783c15e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80"
+            }
             width={600}
             height={360}
             className={styles.storeImg}
@@ -77,24 +85,29 @@ const CoffeeStore: React.FC<Props> = ({ coffeeStore }) => {
           />
         </div>
         <div className={cls("glass", styles.col2)}>
-          <div className={styles.iconWrapper}>
-            <Image
-              src="/static/icons/places.svg"
-              width="24"
-              height="24"
-              alt="location"
-            />
-            <p className={styles.text}>{address}</p>
-          </div>
-          <div className={styles.iconWrapper}>
-            <Image
-              src="/static/icons/nearMe.svg"
-              width="24"
-              height="24"
-              alt="location"
-            />
-            <p className={styles.text}>{neighbourhood}</p>
-          </div>
+          {address && (
+            <div className={styles.iconWrapper}>
+              <Image
+                src="/static/icons/places.svg"
+                width="24"
+                height="24"
+                alt="location"
+              />
+              <p className={styles.text}>{address}</p>
+            </div>
+          )}
+          {neighborhood && (
+            <div className={styles.iconWrapper}>
+              <Image
+                src="/static/icons/nearMe.svg"
+                width="24"
+                height="24"
+                alt="location"
+              />
+              <p className={styles.text}>{neighborhood}</p>
+            </div>
+          )}
+
           <div className={styles.iconWrapper}>
             <Image
               src="/static/icons/star.svg"
@@ -114,3 +127,4 @@ const CoffeeStore: React.FC<Props> = ({ coffeeStore }) => {
 };
 
 export default CoffeeStore;
+//fsq34IcrGmxp+1ZQnl/suODH1maN2QThuBfq/ZDinvpsApQ=
