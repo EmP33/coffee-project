@@ -62,7 +62,7 @@ const CoffeeStore: React.FC<Props> = (initialProps) => {
       const findCoffeeStoreById = coffeeStores.find(
         (coffeeStore: any) => coffeeStore.id.toString() === id
       );
-      console.log(findCoffeeStoreById);
+   
       if (coffeeStores.length > 0) {
         setCoffeStore(findCoffeeStoreById);
       }
@@ -76,7 +76,7 @@ const CoffeeStore: React.FC<Props> = (initialProps) => {
   }
   const { address, neighborhood, name, imgUrl } = coffeeStore;
 
-  console.log(coffeeStore);
+
 
   return (
     <div className={styles.layout}>

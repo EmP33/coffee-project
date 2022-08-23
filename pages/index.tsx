@@ -34,8 +34,6 @@ const Home: React.FC<Props> = ({ coffeeStores }) => {
     handleTrackLocation();
   };
 
-  console.log(process.env);
-
   const { dispatch, state } = useContext(StoreContext);
   const { coffeeStores: fetchedCoffeeStores, latLong } = state;
 
@@ -43,9 +41,12 @@ const Home: React.FC<Props> = ({ coffeeStores }) => {
     async function setCoffeeStoresByLocation() {
       if (latLong) {
         try {
-          const data = await fetchCoffeeStores(
-            "40.733749223985704%2C-74.05012276809782"
-          );
+          const data = await (
+            await fetch(
+              `/api/getCoffeeStoresByLocation?latLong${latLong}&limit=30`
+            )
+          ).json();
+          console.log(data);
 
           // setFetchedCoffeeStores(data);
           dispatch({

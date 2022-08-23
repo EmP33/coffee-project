@@ -1,5 +1,4 @@
 import { createApi } from "unsplash-js";
-console.log(process.env);
 const unsplash = createApi({
   accessKey: "YnG-NDQyK2KGGtcctQt8ZSMvVW_8EvdgJ3_rxs5HT_Y",
 });
@@ -22,7 +21,8 @@ export const getUnsplashPhotos = async () => {
 };
 
 export const fetchCoffeeStores = async (
-  latLong: string = "40.733749223985704%2C-74.05012276809782"
+  latLong: string = "40.733749223985704%2C-74.05012276809782",
+  limit: number = 6
 ) => {
   const photos = await getUnsplashPhotos();
   const options = {
@@ -34,7 +34,7 @@ export const fetchCoffeeStores = async (
   };
 
   const data = await (
-    await fetch(getURLForCoffeeStores(latLong, "coffee", 6), options)
+    await fetch(getURLForCoffeeStores(latLong, "coffee", limit), options)
   ).json();
   return data.results.map((res: any, i: number) => {
     const neighborhood = res.location.neighborhood;
